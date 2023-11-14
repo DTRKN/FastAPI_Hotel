@@ -22,11 +22,13 @@ async def add_booking(
         raise RoomCannotBeBooked
     return f'Cost: {bookings[0].total_cost}, left: {bookings[1] - 1}'
 
-@router.get('')
+@router.get('/bookings')
 async def get_bookings(user: Users = Depends(get_current_user)):
     return await BookingService.find_all(user_id=user.User.id)
 
 @router.delete('/{booking_id}')
-async def found_bookings(booking_id):
-    return None
+async def found_bookings(booking_id: int,
+                         user: Users = Depends(get_current_user)):
+    if user:
+        return await BookingService.delete_id_booking(booking_id=booking_id)
 

@@ -1,7 +1,7 @@
 from db.models.bookings import Bookings
 from db.models.rooms import Rooms
 from db.service.base import BaseService
-from sqlalchemy import select, and_, or_, func, insert
+from sqlalchemy import select, and_, or_, func, insert, delete
 from datetime import date
 from db.database import engine, async_session_maker
 from exceptions import RoomCannotBeBooked
@@ -85,3 +85,13 @@ class BookingService(BaseService):
 
             else:
                 return None
+    @classmethod
+    async def delete_id_booking(
+                     cls,
+                     booking_id: int):
+        async with async_session_maker() as session:
+            query = delete(cls.model).filter_by(id=booking_id)
+            await session.execute(query)
+            await session.commit()
+            return f'Del booking_id: {booking_id}'
+

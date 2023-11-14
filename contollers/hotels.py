@@ -5,6 +5,7 @@ from db.service.rooms import RoomService
 
 router = APIRouter(
     prefix='/hotels',
+    tags=['Hotel']
 )
 @router.get('/{location}')
 async def get_hotels_city(
@@ -12,15 +13,16 @@ async def get_hotels_city(
         date_from: str,
         date_to: str
 ):
-    return await HotelService.find_all(location=location)
+    return await HotelService.find_all(location=location,
+                                       date_from=date_from,
+                                       date_to=date_to)
 
-@router.get('/{id}/rooms')
-async def get_hotels_rooms(
-        id: int,
-        date_from: str,
-        date_to: str
+@router.get('/id/{hotel_id}')
+async def get_hotels(
+        hotel_id: int
 ):
-    return await RoomService.find_all(hotel_id=id)
+    return True
+
 
 
 
