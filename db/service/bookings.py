@@ -4,7 +4,7 @@ from db.service.base import BaseService
 from sqlalchemy import select, and_, or_, func, insert, delete
 from datetime import date
 from db.database import engine, async_session_maker
-from exceptions import RoomCannotBeBooked
+from exceptions import RoomCannotBeBooked, BookingsIdNotFound
 
 class BookingService(BaseService):
     model = Bookings
@@ -48,12 +48,13 @@ class BookingService(BaseService):
             ).where(Rooms.id == room_id).group_by(
                 Rooms.quantity, booked_rooms.c.room_id
             )
-
-            # print(get_rooms_left.compile(engine, compile_kwargs={"literal_binds": True}))
+            print('------------')
+            print(get_rooms_left.compile(engine, compile_kwargs={"literal_binds": True}))
+            print('------------')
 
             rooms_left = await session.execute(get_rooms_left)
             rooms_left: int = rooms_left.scalar()
-            return rooms_left
+            return int(rooms_left)
     @classmethod
     async def add(
             cls,
@@ -63,7 +64,7 @@ class BookingService(BaseService):
             date_to: date,
                   ):
         async with async_session_maker() as session:
-            rooms_left = cls.get_rooms_left(room_id,
+            rooms_left = await cls.get_rooms_left(room_id,
                                             date_from,
                                             date_to)
 
@@ -90,8 +91,11 @@ class BookingService(BaseService):
                      cls,
                      booking_id: int):
         async with async_session_maker() as session:
-            query = delete(cls.model).filter_by(id=booking_id)
-            await session.execute(query)
-            await session.commit()
-            return f'Del booking_id: {booking_id}'
-
+            result = BaseService.find_one_or_none(id=booking_id)
+            if not result:
+                query = delete(cls.model).filter_by(id=booking_id)
+                await session.execute(query)
+                await session.commit()
+                return f'Del booking_id: {booking_id}'
+            else:
+                raise BookingsIdNotFound

@@ -1,5 +1,6 @@
 from fastapi import HTTPException, status
 
+# Разделить исключения на user, bookings, т.д.
 
 class BaseException(HTTPException):
     status_code = 404
@@ -38,4 +39,8 @@ class UserException(BaseException):
 class RoomCannotBeBooked(BaseException):
     status_code = status.HTTP_409_CONFLICT
     detail = 'There are no rooms available'
+
+class BookingsIdNotFound(BaseException):
+    status_code = status.HTTP_404_NOT_FOUND
+    detail = 'id not found'
 
